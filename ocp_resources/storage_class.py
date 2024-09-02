@@ -108,6 +108,12 @@ class StorageClass(Resource):
             if self.mount_options:
                 self.res.update({"mountOptions": self.mount_options})
 
+    def is_default(self):
+        return self.default_sc_annotation == "true"
+
+    def is_virt_default(self):
+        return self.default_virt_sc_annotation == "true"
+
     @property
     def storage_profile(self):
         try:
@@ -118,3 +124,15 @@ class StorageClass(Resource):
         except ResourceNotFoundError:
             self.logger.error(f" storageProfile is not found for {self.name}  storageClass")
             raise
+
+    @property
+    def sc_annotations(self):
+        return self.instance.get("metadata", {}).get("annotations", {})
+
+    @property
+    def default_sc_annotation(self):
+        return self.sc_annotations.get(self.Annotations.IS_DEFAULT_CLASS)
+
+    @property
+    def default_virt_sc_annotation(self):
+        return self.sc_annotations.get(self.Annotations.IS_DEFAULT_VIRT_CLASS)
